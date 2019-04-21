@@ -7,6 +7,6 @@
 void reconnect_mqtt();
 void setupOTA();
 void setup_wifi();
-void sendState(JsonObject object);
+void sendState();
 
 #endif

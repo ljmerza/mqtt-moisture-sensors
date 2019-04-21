@@ -7,6 +7,7 @@
 #include "config.h"
 #include "common.h"
 
+const int BUFFER_SIZE_SEND = JSON_OBJECT_SIZE(10);
 
 void setupOTA(){
     ArduinoOTA.setPort(OTA_PORT);
@@ -74,9 +75,43 @@ void reconnect_mqtt(){
     }
 }
 
-void sendState(JsonObject object){
+void sendState(){
+    
+    // gather data
+    StaticJsonBuffer<BUFFER_SIZE_SEND> jsonBuffer;
+    JsonObject &object = jsonBuffer.createObject();
+
+    digitalWrite(D5, LOW);
+    digitalWrite(D0, LOW);
+    digitalWrite(D2, LOW);
+    digitalWrite(D1, HIGH);
+    object["moisture_m1"] = analogRead(A0);
+    delay(1000);
+
+    digitalWrite(D5, HIGH);
+    digitalWrite(D0, LOW);
+    digitalWrite(D2, LOW);
+    digitalWrite(D1, HIGH);
+    object["moisture_m2"] = analogRead(A0);
+    delay(1000);
+
+    digitalWrite(D5, LOW);
+    digitalWrite(D0, HIGH);
+    digitalWrite(D2, LOW);
+    digitalWrite(D1, HIGH);
+    object["moisture_m3"] = analogRead(A0);
+    delay(1000);
+
+    // digitalWrite(D5, HIGH);
+    // digitalWrite(D0, HIGH);
+    // digitalWrite(D2, LOW);
+    // digitalWrite(D1, HIGH);
+    // object["moisture_m4"] = analogRead(A0);
+    // delay(1000);
+
     char buffer[object.measureLength() + 1];
     object.printTo(buffer, sizeof(buffer));
     object.printTo(Serial);
+    Serial.println("");
     client.publish(STATE_TOPIC, buffer, true);
 }

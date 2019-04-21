@@ -6,16 +6,22 @@
 #include "wifi_common.h"
 
 const int M1 = A0;
-const int BUFFER_SIZE_SEND = JSON_OBJECT_SIZE(10);
 
 void setup() {
   Serial.begin(9600);
-
   setup_wifi();
-
   client.setServer(MQTT_SERVER, 1883);
-
   setupOTA();
+
+  pinMode(D5, OUTPUT);
+  pinMode(D0, OUTPUT);
+  pinMode(D2, OUTPUT);
+  pinMode(D1, OUTPUT);
+
+  digitalWrite(D5, LOW);
+  digitalWrite(D0, LOW);
+  digitalWrite(D2, LOW);
+  digitalWrite(D1, LOW);
 }
 
 void loop() {
@@ -34,22 +40,9 @@ void loop() {
     return;
   }
 
-  // Process MQTT tasks
   client.loop();
-
-  // Handle OTA
   ArduinoOTA.handle();
 
-  // only send state every 1 second
   delay(1000);
-
-  // gather data
-  StaticJsonBuffer<BUFFER_SIZE_SEND> jsonBuffer;
-  JsonObject &object = jsonBuffer.createObject();
-  JsonObject &sub_json = object.createNestedObject("sub_json");
-  sub_json["name"] = 'M1';
-  sub_json["moisture"] = 'M1';
-
-  // send data
-  sendState(object);
+  sendState();
 }
